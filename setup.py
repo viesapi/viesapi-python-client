@@ -23,7 +23,7 @@
 from setuptools import setup
 
 setup(name='viesapi',
-      version='1.2.3',
+      version='1.2.4',
       description='VIES API Client for Python',
       url='https://viesapi.eu',
       author='NETCAT',

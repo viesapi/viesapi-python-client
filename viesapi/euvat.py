@@ -78,7 +78,6 @@ class EUVAT:
             'ES': 'ES[A-Z0-9]{9}',
             'FI': 'FI\\d{8}',
             'FR': 'FR[A-Z0-9]{2}\\d{9}',
-            'GB': 'GB[A-Z0-9]{5,12}',
             'HR': 'HR\\d{11}',
             'HU': 'HU\\d{8}',
             'IE': 'IE[A-Z0-9]{8,9}',
@@ -93,7 +92,8 @@ class EUVAT:
             'RO': 'RO\\d{2,10}',
             'SE': 'SE\\d{12}',
             'SI': 'SI\\d{8}',
-            'SK': 'SK\\d{10}'
+            'SK': 'SK\\d{10}',
+            'XI': 'XI[A-Z0-9]{5,12}'
         }
 
         cc = number[0:2].upper()
