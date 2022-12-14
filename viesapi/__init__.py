@@ -28,4 +28,4 @@ from viesapi.nip import *
 from viesapi.euvat import *
 from viesapi.viesapiclient import *
 
-__version__ = '1.2.4'
+__version__ = '1.2.5'

@@ -45,7 +45,7 @@ class EUVAT:
 
         number = re.sub('[ -]', '', number).upper()
 
-        if not re.match('[A-Z]{2}[A-Z0-9]{2,12}', number):
+        if not re.match('[A-Z]{2}[A-Z0-9+*]{2,12}', number):
             return False
 
         return number
@@ -67,7 +67,7 @@ class EUVAT:
 
         cmap = {
             'AT': 'ATU\\d{8}',
-            'BE': 'BE0\\d{9}',
+            'BE': 'BE[0-1]{1}\\d{9}',
             'BG': 'BG\\d{9,10}',
             'CY': 'CY\\d{8}[A-Z]{1}',
             'CZ': 'CZ\\d{8,10}',
@@ -75,18 +75,18 @@ class EUVAT:
             'DK': 'DK\\d{8}',
             'EE': 'EE\\d{9}',
             'EL': 'EL\\d{9}',
-            'ES': 'ES[A-Z0-9]{9}',
+            'ES': 'ES[A-Z0-9]{1}\\d{7}[A-Z0-9]{1}',
             'FI': 'FI\\d{8}',
             'FR': 'FR[A-Z0-9]{2}\\d{9}',
             'HR': 'HR\\d{11}',
             'HU': 'HU\\d{8}',
-            'IE': 'IE[A-Z0-9]{8,9}',
+            'IE': 'IE[A-Z0-9+*]{8,9}',
             'IT': 'IT\\d{11}',
             'LT': 'LT\\d{9,12}',
             'LU': 'LU\\d{8}',
             'LV': 'LV\\d{11}',
             'MT': 'MT\\d{8}',
-            'NL': 'NL\\d{9}B\\d{2}',
+            'NL': 'NL[A-Z0-9+*]{12}',
             'PL': 'PL\\d{10}',
             'PT': 'PT\\d{9}',
             'RO': 'RO\\d{2,10}',

@@ -42,7 +42,7 @@ class VIESAPIClient:
     VIESAPI service client
     """
 
-    VERSION = '1.2.4'
+    VERSION = '1.2.5'
 
     PRODUCTION_URL = 'https://viesapi.eu/api'
     TEST_URL = 'https://viesapi.eu/api-test'
