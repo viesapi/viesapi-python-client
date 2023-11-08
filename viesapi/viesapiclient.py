@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright 2022 NETCAT (www.netcat.pl)
+# Copyright 2022-2023 NETCAT (www.netcat.pl)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 # @author NETCAT <firma@netcat.pl>
-# @copyright 2022 NETCAT (www.netcat.pl)
+# @copyright 2022-2023 NETCAT (www.netcat.pl)
 # @license https://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -42,7 +42,7 @@ class VIESAPIClient:
     VIESAPI service client
     """
 
-    VERSION = '1.2.5'
+    VERSION = '1.2.6'
 
     PRODUCTION_URL = 'https://viesapi.eu/api'
     TEST_URL = 'https://viesapi.eu/api-test'
@@ -102,25 +102,12 @@ class VIESAPIClient:
         url = self.__url__ + '/get/vies/' + suffix
 
         # send request
-        res = self.__get(url)
+        doc = self.__get(url)
 
-        if not res:
-            self.__set(Error.CLI_CONNECT)
+        if not doc:
             return False
 
         # parse response
-        doc = etree.parse(BytesIO(res))
-
-        if not doc:
-            self.__set(Error.CLI_RESPONSE)
-            return False
-
-        code = self.__get_text(doc, '/result/error/code/text()')
-
-        if len(code) > 0:
-            self.__set(int(code), self.__get_text(doc, '/result/error/description/text()'))
-            return False
-
         vies = VIESData()
 
         vies.uid = self.__get_text(doc, '/result/vies/uid/text()')
@@ -154,25 +141,12 @@ class VIESAPIClient:
         url = self.__url__ + '/check/account/status'
 
         # send request
-        res = self.__get(url)
+        doc = self.__get(url)
 
-        if not res:
-            self.__set(Error.CLI_CONNECT)
+        if not doc:
             return False
 
         # parse response
-        doc = etree.parse(BytesIO(res))
-
-        if not doc:
-            self.__set(Error.CLI_RESPONSE)
-            return False
-
-        code = self.__get_text(doc, '/result/error/code/text()')
-
-        if len(code) > 0:
-            self.__set(int(code), self.__get_text(doc, '/result/error/description/text()'))
-            return False
-
         status = AccountStatus()
 
         status.uid = self.__get_text(doc, '/result/account/uid/text()')
@@ -289,16 +263,42 @@ class VIESAPIClient:
         :rtype: str
         """
 
-        return 'VIESAPIClient/' + self.VERSION + ' Python/' + str(sys.version_info[0]) + '.' + str(sys.version_info[1]) \
-               + '.' + str(sys.version_info[2])
+        return 'VIESAPIClient/' + self.VERSION + ' Python/' + str(sys.version_info[0]) \
+            + '.' + str(sys.version_info[1]) + '.' + str(sys.version_info[2])
+
+    def __parse(self, data):
+        """
+        Parse HTTP response
+        :param data: response data
+        :type data: Any
+        :returns: XML document or False
+        :rtype: ElementTree or False
+        """
+        try:
+            doc = etree.parse(BytesIO(data))
+
+            if not doc:
+                self.__set(Error.CLI_RESPONSE)
+                return False
+
+            code = self.__get_text(doc, '/result/error/code/text()')
+
+            if len(code) > 0:
+                self.__set(int(code), self.__get_text(doc, '/result/error/description/text()'))
+                return False
+
+            return doc
+        except Exception as e:
+            self.__set(Error.CLI_EXCEPTION, str(e))
+        return False
 
     def __get(self, url):
         """
         Get result of HTTP GET request
         :param url: target URL
         :type url: str
-        :returns: result content or False
-        :rtype: bytearray or False
+        :returns: result as XML document
+        :rtype: ElementTree or False
         """
 
         # auth
@@ -310,16 +310,19 @@ class VIESAPIClient:
         # send request
         try:
             req = urllib.request.Request(url)
-            req.add_header('User-Agent', self.__user_agent())
+            req.add_header('Accept', 'text/xml')
             req.add_header('Authorization', auth)
+            req.add_header('User-Agent', self.__user_agent())
 
             res = urllib.request.urlopen(req)
-            content = res.read()
-        except urllib.error.URLError as ue:
-            # print ue.code
-            return False
 
-        return content
+            return self.__parse(res.read())
+        except urllib.error.HTTPError as he:
+            if self.__parse(he.read()):
+                self.__set(Error.CLI_EXCEPTION, he.reason)
+        except urllib.error.URLError as ue:
+            self.__set(Error.CLI_EXCEPTION, ue.reason)
+        return False
 
     def __get_text(self, doc, xpath):
         """

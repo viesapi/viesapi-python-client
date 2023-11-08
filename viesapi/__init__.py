@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright 2022 NETCAT (www.netcat.pl)
+# Copyright 2022-2023 NETCAT (www.netcat.pl)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 # @author NETCAT <firma@netcat.pl>
-# @copyright 2022 NETCAT (www.netcat.pl)
+# @copyright 2022-2023 NETCAT (www.netcat.pl)
 # @license https://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -28,4 +28,4 @@ from viesapi.nip import *
 from viesapi.euvat import *
 from viesapi.viesapiclient import *
 
-__version__ = '1.2.5'
+__version__ = '1.2.6'
