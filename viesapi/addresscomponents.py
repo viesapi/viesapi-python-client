@@ -20,13 +20,25 @@
 # @license https://www.apache.org/licenses/LICENSE-2.0
 #
 
-from viesapi.error import *
-from viesapi.number import *
-from viesapi.addresscomponents import *
-from viesapi.viesdata import *
-from viesapi.accountstatus import *
-from viesapi.nip import *
-from viesapi.euvat import *
-from viesapi.viesapiclient import *
 
-__version__ = '1.2.7'
+class AddressComponents:
+    """
+    Address components
+    """
+
+    def __init__(self):
+        self.country = None
+        self.postal_code = None
+        self.city = None
+        self.street = None
+        self.street_number = None
+        self.house_number = None
+
+    def __str__(self):
+        return 'AddressComponents: [country = ' + str(self.country) \
+            + ', postal_code = ' + str(self.postal_code) \
+            + ', city = ' + str(self.city) \
+            + ', street = ' + str(self.street) \
+            + ', street_number = ' + str(self.street_number) \
+            + ', house_number = ' + str(self.house_number) \
+            + ']'

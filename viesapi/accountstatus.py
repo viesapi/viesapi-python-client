@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright 2022-2023 NETCAT (www.netcat.pl)
+# Copyright 2022-2025 NETCAT (www.netcat.pl)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 # @author NETCAT <firma@netcat.pl>
-# @copyright 2022-2023 NETCAT (www.netcat.pl)
+# @copyright 2022-2025 NETCAT (www.netcat.pl)
 # @license https://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -36,6 +36,7 @@ class AccountStatus:
         self.subscription_price = None
         self.item_price = None
         self.item_price_status = None
+        self.item_price_parsed = None
 
         self.limit = None
         self.request_delay = None
@@ -49,8 +50,10 @@ class AccountStatus:
         self.monitor = None
 
         self.func_get_vies_data = None
+        self.func_get_vies_data_parsed = None
 
         self.vies_data_count = None
+        self.vies_data_parsed_count = None
         self.total_count = None
 
     def __str__(self):
@@ -61,6 +64,7 @@ class AccountStatus:
             + ', subscription_price = ' + str(self.subscription_price) \
             + ', item_price = ' + str(self.item_price) \
             + ', item_price_status = ' + str(self.item_price_status) \
+            + ', item_price_parsed = ' + str(self.item_price_parsed) \
             + ', limit = ' + str(self.limit) \
             + ', request_delay = ' + str(self.request_delay) \
             + ', domain_limit = ' + str(self.domain_limit) \
@@ -71,6 +75,8 @@ class AccountStatus:
             + ', stats = ' + str(self.stats) \
             + ', monitor = ' + str(self.monitor) \
             + ', func_get_vies_data = ' + str(self.func_get_vies_data) \
+            + ', func_get_vies_data_parsed = ' + str(self.func_get_vies_data_parsed) \
             + ', vies_data_count = ' + str(self.vies_data_count) \
+            + ', vies_data_parsed_count = ' + str(self.vies_data_parsed_count) \
             + ', total_count = ' + str(self.total_count) \
             + ']'

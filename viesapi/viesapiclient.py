@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright 2022-2023 NETCAT (www.netcat.pl)
+# Copyright 2022-2025 NETCAT (www.netcat.pl)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 # @author NETCAT <firma@netcat.pl>
-# @copyright 2022-2023 NETCAT (www.netcat.pl)
+# @copyright 2022-2025 NETCAT (www.netcat.pl)
 # @license https://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -31,7 +31,7 @@ import urllib.request
 import urllib.parse
 import urllib.error
 
-from viesapi import Error, Number, NIP, EUVAT, VIESData, AccountStatus
+from viesapi import Error, Number, NIP, EUVAT, VIESData, AccountStatus, AddressComponents
 from io import BytesIO
 from lxml import etree
 from dateutil.parser import parse
@@ -42,7 +42,7 @@ class VIESAPIClient:
     VIESAPI service client
     """
 
-    VERSION = '1.2.6'
+    VERSION = '1.2.7'
 
     PRODUCTION_URL = 'https://viesapi.eu/api'
     TEST_URL = 'https://viesapi.eu/api-test'
@@ -127,6 +127,66 @@ class VIESAPIClient:
 
         return vies
 
+    def get_vies_data_parsed(self, euvat):
+        """
+        Get VIES data returning parsed trader address for specified number
+        :param euvat: EU VAT number with 2-letter country prefix
+        :type euvat: str
+        :return: VIESData object or False
+        :rtype: VIESData or False
+        """
+
+        # clear error
+        self.__clear()
+
+        # validate number and construct path
+        suffix = self.__get_path_suffix(Number.EUVAT, euvat)
+
+        if not suffix:
+            return False
+
+        # prepare url
+        url = self.__url__ + '/get/vies/parsed/' + suffix
+
+        # send request
+        doc = self.__get(url)
+
+        if not doc:
+            return False
+
+        # parse response
+        vies = VIESData()
+
+        vies.uid = self.__get_text(doc, '/result/vies/uid/text()')
+
+        vies.country_code = self.__get_text(doc, '/result/vies/countryCode/text()')
+        vies.vat_number = self.__get_text(doc, '/result/vies/vatNumber/text()')
+
+        vies.valid = True if self.__get_text(doc, '/result/vies/valid/text()') == 'true' else False
+
+        vies.trader_name = self.__get_text(doc, '/result/vies/traderName/text()')
+        vies.trader_company_type = self.__get_text(doc, '/result/vies/traderCompanyType/text()')
+        vies.trader_address = self.__get_text(doc, '/result/vies/traderAddress/text()')
+
+        country = self.__get_text(doc, '/result/vies/traderAddressComponents/country/text()')
+
+        if country and len(country) > 0:
+            ac = AddressComponents()
+            ac.country = country
+            ac.postal_code = self.__get_text(doc, '/result/vies/traderAddressComponents/postalCode/text()')
+            ac.city = self.__get_text(doc, '/result/vies/traderAddressComponents/city/text()')
+            ac.street = self.__get_text(doc, '/result/vies/traderAddressComponents/street/text()')
+            ac.street_number = self.__get_text(doc, '/result/vies/traderAddressComponents/streetNumber/text()')
+            ac.house_number = self.__get_text(doc, '/result/vies/traderAddressComponents/houseNumber/text()')
+
+            vies.trader_address_components = ac
+
+        vies.id = self.__get_text(doc, '/result/vies/id/text()')
+        vies.date = self.__get_date(doc, '/result/vies/date/text()')
+        vies.source = self.__get_text(doc, '/result/vies/source/text()')
+
+        return vies
+
     def get_account_status(self):
         """
         Get user account's status
@@ -159,6 +219,8 @@ class VIESAPIClient:
         status.item_price = float('0' + self.__get_text(doc, '/result/account/billingPlan/itemPrice/text()'))
         status.item_price_status = float(
             '0' + self.__get_text(doc, '/result/account/billingPlan/itemPriceCheckStatus/text()'))
+        status.item_price_parsed = float(
+            '0' + self.__get_text(doc, '/result/account/billingPlan/itemPriceStatusParsed/text()'))
 
         status.limit = int(self.__get_text(doc, '/result/account/billingPlan/limit/text()'))
         status.request_delay = int(self.__get_text(doc, '/result/account/billingPlan/requestDelay/text()'))
@@ -175,8 +237,11 @@ class VIESAPIClient:
 
         status.func_get_vies_data = True if self.__get_text(doc,
                                                          '/result/account/billingPlan/funcGetVIESData/text()') == 'true' else False
+        status.func_get_vies_data_parsed = True if self.__get_text(doc,
+                                                         '/result/account/billingPlan/funcGetVIESDataParsed/text()') == 'true' else False
 
         status.vies_data_count = int(self.__get_text(doc, '/result/account/requests/viesData/text()'))
+        status.vies_data_parsed_count = int(self.__get_text(doc, '/result/account/requests/viesDataParsed/text()'))
         status.total_count = int(self.__get_text(doc, '/result/account/requests/total/text()'))
 
         return status

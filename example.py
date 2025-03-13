@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright 2022-2023 NETCAT (www.netcat.pl)
+# Copyright 2022-2025 NETCAT (www.netcat.pl)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 # @author NETCAT <firma@netcat.pl>
-# @copyright 2022-2023 NETCAT (www.netcat.pl)
+# @copyright 2022-2025 NETCAT (www.netcat.pl)
 # @license https://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -45,5 +45,13 @@ vies = viesapi.get_vies_data(euvat)
 
 if vies:
     print(vies)
+else:
+    print('Error: ' + viesapi.get_last_error() + ' (code: ' + str(viesapi.get_last_error_code()) + ')')
+
+# Get VIES data returning parsed trader address from VIES system
+vies_parsed = viesapi.get_vies_data_parsed(euvat)
+
+if vies_parsed:
+    print(vies_parsed)
 else:
     print('Error: ' + viesapi.get_last_error() + ' (code: ' + str(viesapi.get_last_error_code()) + ')')

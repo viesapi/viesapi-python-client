@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright 2022-2023 NETCAT (www.netcat.pl)
+# Copyright 2022-2025 NETCAT (www.netcat.pl)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 # @author NETCAT <firma@netcat.pl>
-# @copyright 2022-2023 NETCAT (www.netcat.pl)
+# @copyright 2022-2025 NETCAT (www.netcat.pl)
 # @license https://www.apache.org/licenses/LICENSE-2.0
 #
 
@@ -34,6 +34,7 @@ class VIESData:
         self.trader_name = None
         self.trader_company_type = None
         self.trader_address = None
+        self.trader_address_components = None
         self.id = None
         self.date = None
         self.source = None
@@ -46,6 +47,7 @@ class VIESData:
             + ', trader_name = ' + str(self.trader_name) \
             + ', trader_company_type = ' + str(self.trader_company_type) \
             + ', trader_address = ' + str(self.trader_address) \
+            + ', trader_address_components = ' + str(self.trader_address_components) \
             + ', id = ' + str(self.id) \
             + ', date = ' + str(self.date) \
             + ', source = ' + str(self.source) \
