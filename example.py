@@ -19,6 +19,7 @@
 # @copyright 2022-2025 NETCAT (www.netcat.pl)
 # @license https://www.apache.org/licenses/LICENSE-2.0
 #
+from time import sleep
 
 from viesapi import *
 
@@ -55,3 +56,33 @@ if vies_parsed:
     print(vies_parsed)
 else:
     print('Error: ' + viesapi.get_last_error() + ' (code: ' + str(viesapi.get_last_error_code()) + ')')
+
+# Upload batch of VAT numbers and get their current VAT statuses and traders data
+numbers = [
+    euvat,
+    'DK56314210',
+    'CZ7710043187'
+]
+
+token = viesapi.get_vies_data_async(numbers)
+
+if token:
+    print('Batch token: ' + token)
+else:
+    print('Error: ' + viesapi.get_last_error() + ' (code: ' + str(viesapi.get_last_error_code()) + ')')
+
+# Check batch result and download data (at production it usually takes 2-3 min for result to be ready)
+while True:
+    result = viesapi.get_vies_data_async_result(token)
+    if result:
+        break
+
+    if viesapi.get_last_error_code() != Error.BATCH_PROCESSING:
+        print('Error: ' + viesapi.get_last_error() + ' (code: ' + str(viesapi.get_last_error_code()) + ')')
+        break
+
+    print('Batch is still processing, waiting...')
+    sleep(10)
+
+# Batch result is ready
+print(result)

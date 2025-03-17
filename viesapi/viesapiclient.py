@@ -24,14 +24,16 @@ import base64
 import datetime
 import hashlib
 import hmac
+import itertools
 import os
 import sys
 import time
+import uuid
 import urllib.request
 import urllib.parse
 import urllib.error
 
-from viesapi import Error, Number, NIP, EUVAT, VIESData, AccountStatus, AddressComponents
+from viesapi import Error, Number, NIP, EUVAT, VIESData, VIESError, BatchResult, AccountStatus, AddressComponents
 from io import BytesIO
 from lxml import etree
 from dateutil.parser import parse
@@ -42,7 +44,7 @@ class VIESAPIClient:
     VIESAPI service client
     """
 
-    VERSION = '1.2.7'
+    VERSION = '1.2.8'
 
     PRODUCTION_URL = 'https://viesapi.eu/api'
     TEST_URL = 'https://viesapi.eu/api-test'
@@ -186,6 +188,125 @@ class VIESAPIClient:
         vies.source = self.__get_text(doc, '/result/vies/source/text()')
 
         return vies
+
+    def get_vies_data_async(self, numbers):
+        """
+        Upload batch of VAT numbers and get their current VAT statuses and traders data
+        :param numbers: Array of EU VAT numbers with 2-letter country prefix
+        :type numbers: list
+        :return: Batch token for checking status and getting the result
+        :rtype: string or False
+        """
+
+        # clear error
+        self.__clear()
+
+        # validate input
+        if len(numbers) < 2 or len(numbers) > 99:
+            self.__set(Error.CLI_BATCH_SIZE)
+            return False
+
+        # prepare request string
+        xml = '<?xml version="1.0" encoding="utf-8"?>\r\n' \
+            + '<request>\r\n' \
+            + '  <batch>\r\n' \
+            + '    <numbers>\r\n'
+
+        for number in numbers:
+            if not EUVAT.is_valid(number):
+                self.__set(Error.CLI_EUVAT)
+                return False
+
+            xml += '      <number>' + EUVAT.normalize(number) + '</number>\r\n'
+
+        xml += '    </numbers>\r\n' \
+           + '  </batch>\r\n' \
+           + '</request>'
+
+        # prepare url
+        url = self.__url__ + '/batch/vies'
+
+        # send request
+        doc = self.__post(url, 'text/xml; charset=utf-8', xml)
+
+        if not doc:
+            return False
+
+        # parse response
+        token = self.__get_text(doc, '/result/batch/token/text()')
+
+        if not token:
+            self.__set(Error.CLI_RESPONSE)
+            return False
+
+        return token
+
+    def get_vies_data_async_result(self, token):
+        """
+        Check batch result and download data
+        :param token: Batch token received from get_vies_data_async function
+        :type token: string
+        :return: Batch result
+        :rtype: BatchResult or False
+        """
+
+        # clear error
+        self.__clear()
+
+        # validate input
+        if not self.__is_uuid(token):
+            self.__set(Error.CLI_INPUT)
+            return False
+
+        # prepare url
+        url = self.__url__ + '/batch/vies/' + token
+
+        # send request
+        doc = self.__get(url)
+
+        if not doc:
+            return False
+
+        # parse response
+        br = BatchResult()
+
+        for i in itertools.count(start=1):
+            uid = self.__get_text(doc, '/result/batch/numbers/vies[' + str(i) + ']/uid/text()')
+
+            if len(uid) == 0:
+                break
+
+            vd = VIESData()
+            vd.uid = uid
+            vd.country_code = self.__get_text(doc, '/result/batch/numbers/vies[' + str(i) + ']/countryCode/text()')
+            vd.vat_number = self.__get_text(doc, '/result/batch/numbers/vies[' + str(i) + ']/vatNumber/text()')
+            vd.valid = True if self.__get_text(doc, '/result/batch/numbers/vies[' + str(i) + ']/valid/text()') == 'true' else False
+            vd.trader_name = self.__get_text(doc, '/result/batch/numbers/vies[' + str(i) + ']/traderName/text()')
+            vd.trader_company_type = self.__get_text(doc, '/result/batch/numbers/vies[' + str(i) + ']/traderCompanyType/text()')
+            vd.trader_address = self.__get_text(doc, '/result/batch/numbers/vies[' + str(i) + ']/traderAddress/text()')
+            vd.id = self.__get_text(doc, '/result/batch/numbers/vies[' + str(i) + ']/id/text()')
+            vd.date = self.__get_date(doc, '/result/batch/numbers/vies[' + str(i) + ']/date/text()')
+            vd.source = self.__get_text(doc, '/result/batch/numbers/vies[' + str(i) + ']/source/text()')
+
+            br.numbers.append(vd)
+
+        for i in itertools.count(start=1):
+            uid = self.__get_text(doc, '/result/batch/errors/error[' + str(i) + ']/uid/text()')
+
+            if len(uid) == 0:
+                break
+
+            ve = VIESError()
+            ve.uid = uid
+            ve.country_code = self.__get_text(doc, '/result/batch/errors/error[' + str(i) + ']/countryCode/text()')
+            ve.vat_number = self.__get_text(doc, '/result/batch/errors/error[' + str(i) + ']/vatNumber/text()')
+            ve.error = self.__get_text(doc, '/result/batch/errors/error[' + str(i) + ']/error/text()')
+            ve.date = self.__get_date(doc, '/result/batch/errors/error[' + str(i) + ']/date/text()')
+            ve.source = self.__get_text(doc, '/result/batch/errors/error[' + str(i) + ']/source/text()')
+
+            br.errors.append(ve)
+
+        return br
 
     def get_account_status(self):
         """
@@ -389,6 +510,44 @@ class VIESAPIClient:
             self.__set(Error.CLI_EXCEPTION, ue.reason)
         return False
 
+    def __post(self, url, type, content):
+        """
+        Get result of HTTP POST request
+        :param url: target URL
+        :type url: str
+        :param type: content type
+        :type url: str
+        :param url: content bytes
+        :type url: str
+        :returns: result as XML document
+        :rtype: ElementTree or False
+        """
+
+        # auth
+        auth = self.__auth('POST', url)
+
+        if not auth:
+            return False
+
+        # send request
+        try:
+            req = urllib.request.Request(url)
+            req.add_header('Accept', 'text/xml')
+            req.add_header('Authorization', auth)
+            req.add_header('Content-Type', type)
+            req.add_header('User-Agent', self.__user_agent())
+            req.data = content.encode('utf-8')
+
+            res = urllib.request.urlopen(req)
+
+            return self.__parse(res.read())
+        except urllib.error.HTTPError as he:
+            if self.__parse(he.read()):
+                self.__set(Error.CLI_EXCEPTION, he.reason)
+        except urllib.error.URLError as ue:
+            self.__set(Error.CLI_EXCEPTION, ue.reason)
+        return False
+
     def __get_text(self, doc, xpath):
         """
         Get XML element as text
@@ -482,3 +641,21 @@ class VIESAPIClient:
             return False
 
         return path
+
+    def __is_uuid(self, value):
+        """
+        Check if string is a valid guid
+        :param value: string to check
+        :type value: str
+        :return: true if string is valid uuid
+        :rtype: bool
+        """
+        try:
+            if not value or len(value) == 0:
+                return False
+
+            uuid.UUID(str(value))
+
+            return True
+        except Exception:
+            return False

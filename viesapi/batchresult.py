@@ -20,15 +20,17 @@
 # @license https://www.apache.org/licenses/LICENSE-2.0
 #
 
-from viesapi.error import *
-from viesapi.number import *
-from viesapi.addresscomponents import *
-from viesapi.viesdata import *
-from viesapi.vieserror import *
-from viesapi.batchresult import *
-from viesapi.accountstatus import *
-from viesapi.nip import *
-from viesapi.euvat import *
-from viesapi.viesapiclient import *
 
-__version__ = '1.2.8'
+class BatchResult:
+    """
+    Batch result
+    """
+
+    def __init__(self):
+        self.numbers = []
+        self.errors = []
+
+    def __str__(self):
+        return 'BatchResult: [numbers = [' + ', '.join(str(e) for e in self.numbers) + ']' \
+            + ', errors = [' + ', '.join(str(e) for e in self.errors) + ']' \
+            + ']'

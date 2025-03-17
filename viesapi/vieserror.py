@@ -20,15 +20,25 @@
 # @license https://www.apache.org/licenses/LICENSE-2.0
 #
 
-from viesapi.error import *
-from viesapi.number import *
-from viesapi.addresscomponents import *
-from viesapi.viesdata import *
-from viesapi.vieserror import *
-from viesapi.batchresult import *
-from viesapi.accountstatus import *
-from viesapi.nip import *
-from viesapi.euvat import *
-from viesapi.viesapiclient import *
 
-__version__ = '1.2.8'
+class VIESError:
+    """
+    VIES error
+    """
+
+    def __init__(self):
+        self.uid = None
+        self.country_code = None
+        self.vat_number = None
+        self.error = None
+        self.date = None
+        self.source = None
+
+    def __str__(self):
+        return 'VIESError: [uid = ' + str(self.uid) \
+            + ', country_code = ' + str(self.country_code) \
+            + ', vat_number = ' + str(self.vat_number) \
+            + ', error = ' + str(self.error) \
+            + ', date = ' + str(self.date) \
+            + ', source = ' + str(self.source) \
+            + ']'
