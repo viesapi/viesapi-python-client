@@ -49,7 +49,7 @@ if vies:
 else:
     print('Error: ' + viesapi.get_last_error() + ' (code: ' + str(viesapi.get_last_error_code()) + ')')
 
-# Get VIES data returning parsed trader address from VIES system
+# Get VIES data returning parsed trader name and address from VIES system
 vies_parsed = viesapi.get_vies_data_parsed(euvat)
 
 if vies_parsed:

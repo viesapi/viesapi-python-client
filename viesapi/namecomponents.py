@@ -20,15 +20,21 @@
 # @license https://www.apache.org/licenses/LICENSE-2.0
 #
 
-from setuptools import setup
 
-setup(name='viesapi',
-      version='1.2.9',
-      description='VIES API Client for Python',
-      url='https://viesapi.eu',
-      author='NETCAT',
-      author_email='firma@netcat.pl',
-      license='https://www.apache.org/licenses/LICENSE-2.0',
-      packages=['viesapi'],
-      zip_safe=False,
-      install_requires=['lxml', 'python-dateutil'])
+class NameComponents:
+    """
+    Name components
+    """
+
+    def __init__(self):
+        self.name = None
+        self.legal_form = None
+        self.legal_form_canonical_id = None
+        self.legal_form_canonical_name = None
+
+    def __str__(self):
+        return 'NameComponents: [name = ' + str(self.name) \
+            + ', legal_form = ' + str(self.legal_form) \
+            + ', legal_form_canonical_id = ' + str(self.legal_form_canonical_id) \
+            + ', legal_form_canonical_name = ' + str(self.legal_form_canonical_name) \
+            + ']'

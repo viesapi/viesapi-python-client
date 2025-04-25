@@ -20,15 +20,27 @@
 # @license https://www.apache.org/licenses/LICENSE-2.0
 #
 
-from setuptools import setup
+class LegalForm:
+    """
+    Legal form types
+    """
 
-setup(name='viesapi',
-      version='1.2.9',
-      description='VIES API Client for Python',
-      url='https://viesapi.eu',
-      author='NETCAT',
-      author_email='firma@netcat.pl',
-      license='https://www.apache.org/licenses/LICENSE-2.0',
-      packages=['viesapi'],
-      zip_safe=False,
-      install_requires=['lxml', 'python-dateutil'])
+    UNKNOWN = 0
+    SOLE_PROPRIETORSHIP = 1
+    LIMITED_LIABILITY_COMPANY = 2
+    GENERAL_PARTNERSHIP = 3
+    JOINT_STOCK_COMPANY = 4
+    LIMITED_PARTNERSHIP = 5
+    PRIVATE_LIMITED_LIABILITY_COMPANY = 6
+    SINGLE_MEMBER_JOINT_STOCK_COMPANY = 7
+    SIMPLE_LIMITED_LIABILITY_COMPANY = 8
+    SINGLE_MEMBER_LIMITED_LIABILITY_COMPANY = 9
+    SIMPLIFIED_JOINT_STOCK_COMPANY = 10
+    SMALL_COMPANY = 11
+    LIMITED_JOINT_STOCK_PARTNERSHIP = 12
+    PROFESSIONAL_PARTNERSHIP = 13
+    LIMITED_LIABILITY_PARTNERSHIP = 14
+    PRIVATE_PARTNERSHIP = 15
+    LIMITED_LIABILITY_COMPANY_LIMITED_PARTNERSHIP = 16
+    LIMITED_LIABILITY_COMPANY_LIMITED_JOINT_STOCK_PARTNERSHIP = 17
+    PUBLIC_INSTITUTION = 18

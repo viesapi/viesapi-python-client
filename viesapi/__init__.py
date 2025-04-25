@@ -22,6 +22,8 @@
 
 from viesapi.error import *
 from viesapi.number import *
+from viesapi.legalform import *
+from viesapi.namecomponents import *
 from viesapi.addresscomponents import *
 from viesapi.viesdata import *
 from viesapi.vieserror import *
@@ -31,4 +33,4 @@ from viesapi.nip import *
 from viesapi.euvat import *
 from viesapi.viesapiclient import *
 
-__version__ = '1.2.8'
+__version__ = '1.2.9'

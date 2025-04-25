@@ -32,6 +32,7 @@ class VIESData:
         self.vat_number = None
         self.valid = None
         self.trader_name = None
+        self.trader_name_components = None
         self.trader_company_type = None
         self.trader_address = None
         self.trader_address_components = None
@@ -45,6 +46,7 @@ class VIESData:
             + ', vat_number = ' + str(self.vat_number) \
             + ', valid = ' + str(self.valid) \
             + ', trader_name = ' + str(self.trader_name) \
+            + ', trader_name_components = ' + str(self.trader_name_components) \
             + ', trader_company_type = ' + str(self.trader_company_type) \
             + ', trader_address = ' + str(self.trader_address) \
             + ', trader_address_components = ' + str(self.trader_address_components) \

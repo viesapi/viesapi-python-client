@@ -33,7 +33,8 @@ import urllib.request
 import urllib.parse
 import urllib.error
 
-from viesapi import Error, Number, NIP, EUVAT, VIESData, VIESError, BatchResult, AccountStatus, AddressComponents
+from viesapi import (Error, Number, LegalForm, NIP, EUVAT, VIESData, VIESError, BatchResult,
+                     AccountStatus, NameComponents, AddressComponents)
 from io import BytesIO
 from lxml import etree
 from dateutil.parser import parse
@@ -44,7 +45,7 @@ class VIESAPIClient:
     VIESAPI service client
     """
 
-    VERSION = '1.2.8'
+    VERSION = '1.2.9'
 
     PRODUCTION_URL = 'https://viesapi.eu/api'
     TEST_URL = 'https://viesapi.eu/api-test'
@@ -163,10 +164,20 @@ class VIESAPIClient:
 
         vies.country_code = self.__get_text(doc, '/result/vies/countryCode/text()')
         vies.vat_number = self.__get_text(doc, '/result/vies/vatNumber/text()')
-
         vies.valid = True if self.__get_text(doc, '/result/vies/valid/text()') == 'true' else False
-
         vies.trader_name = self.__get_text(doc, '/result/vies/traderName/text()')
+
+        name = self.__get_text(doc, '/result/vies/traderNameComponents/name/text()')
+
+        if name and len(name) > 0:
+            nc = NameComponents()
+            nc.name = name
+            nc.legal_form = self.__get_text(doc, '/result/vies/traderNameComponents/legalForm/text()')
+            nc.legal_form_canonical_id = int(self.__get_text(doc, '/result/vies/traderNameComponents/legalFormCanonicalId/text()'))
+            nc.legal_form_canonical_name = self.__get_text(doc, '/result/vies/traderNameComponents/legalFormCanonicalName/text()')
+
+            vies.trader_name_components = nc
+
         vies.trader_company_type = self.__get_text(doc, '/result/vies/traderCompanyType/text()')
         vies.trader_address = self.__get_text(doc, '/result/vies/traderAddress/text()')
 
